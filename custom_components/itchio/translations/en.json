@@ -1,0 +1,31 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Itch.io Configuration",
+        "description": "Please enter your Itch.io API key.",
+        "data": {
+          "api_key": "API Key",
+          "scan_interval": "Scan Interval (minutes)"
+        }
+      }
+    },
+    "error": {
+      "invalid_api_key": "Invalid API key"
+    },
+    "abort": {
+      "already_configured": "This API key is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Itch.io Options",
+        "description": "Adjust the settings.",
+        "data": {
+          "scan_interval": "Scan Interval (minutes)"
+        }
+      }
+    }
+  }
+}
