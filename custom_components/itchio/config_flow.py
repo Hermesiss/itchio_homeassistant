@@ -16,7 +16,7 @@ class ItchioConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             api_key = user_input.get("api_key")
-            scan_interval = user_input.get("scan_interval", 30)
+            scan_interval = user_input.get("scan_interval", 5)
 
             await self.async_set_unique_id(api_key)
             self._abort_if_unique_id_configured()
@@ -29,7 +29,7 @@ class ItchioConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema({
             vol.Required("api_key"): str,
-            vol.Optional("scan_interval", default=30): vol.All(int, vol.Range(min=5)),
+            vol.Optional("scan_interval", default=5): vol.All(int, vol.Range(min=5)),
         })
 
         return self.async_show_form(
@@ -65,7 +65,7 @@ class ItchioOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=user_input)
 
         data_schema = vol.Schema({
-            vol.Optional("scan_interval", default=self.config_entry.options.get("scan_interval", 30)): vol.All(int, vol.Range(min=5)),
+            vol.Optional("scan_interval", default=self.config_entry.options.get("scan_interval", 5)): vol.All(int, vol.Range(min=5)),
         })
 
         return self.async_show_form(step_id="init", data_schema=data_schema)

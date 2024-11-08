@@ -19,12 +19,12 @@ async def async_setup(hass: HomeAssistant, config: dict):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up Itch.io from a config entry."""
     api_key = entry.data[CONF_API_KEY]
-    scan_interval = entry.options.get("scan_interval", 30)
+    scan_interval = entry.options.get("scan_interval", 5)
 
-    coordinator = ItchioDataUpdateCoordinator(hass, api_key, scan_interval)
-    await coordinator.async_config_entry_first_refresh()
+    coord = ItchioDataUpdateCoordinator(hass, api_key, scan_interval)
+    await coord.async_config_entry_first_refresh()
 
-    hass.data[DOMAIN][entry.entry_id] = coordinator
+    hass.data[DOMAIN][entry.entry_id] = coord
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True

@@ -4,6 +4,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from .const import DOMAIN, SENSOR_TYPES
 
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     """Set up Itch.io sensors based on a config entry."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -14,6 +15,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             sensors.append(ItchioSensor(coordinator, game, sensor_type))
 
     async_add_entities(sensors)
+
 
 class ItchioSensor(CoordinatorEntity):
     """Representation of an Itch.io Sensor."""
@@ -40,10 +42,18 @@ class ItchioSensor(CoordinatorEntity):
     def state(self):
         """Return the state of the sensor."""
         game_id = self.game["id"]
+        self._update_game_data(game_id)
+        return self._get_sensor_value()
+
+    def _update_game_data(self, game_id):
+        """Update game data from coordinator."""
         for game in self.coordinator.data.get("games", []):
             if game["id"] == game_id:
                 self.game = game
                 break
+
+    def _get_sensor_value(self):
+        """Get the value of the sensor."""
         value = self.game.get(self.type)
         if self.type == "earnings":
             amount = self.game.get("earnings", [{}])[0].get("amount", 0)

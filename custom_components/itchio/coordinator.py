@@ -5,7 +5,6 @@ import logging
 import aiohttp
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.core import HomeAssistant
-from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
