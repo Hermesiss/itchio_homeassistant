@@ -2,7 +2,7 @@
   "domain": "itchio",
   "name": "Itch.io Integration",
   "after_dependencies": ["http"],
-  "codeowners": ["@Hermesiss"],
+  "codeowners": ["Hermesiss"],
   "config_flow": true,
   "documentation": "https://github.com/Hermesiss/itchio_homeassistant",
   "integration_type": "hub",

@@ -4,7 +4,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from .const import DOMAIN, SENSOR_TYPES
 
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     """Set up Itch.io sensors based on a config entry."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -15,7 +14,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             sensors.append(ItchioSensor(coordinator, game, sensor_type))
 
     async_add_entities(sensors)
-
 
 class ItchioSensor(CoordinatorEntity):
     """Representation of an Itch.io Sensor."""
@@ -78,3 +76,8 @@ class ItchioSensor(CoordinatorEntity):
             "title": self.game.get("title"),
             "url": self.game.get("url"),
         }
+
+    async def async_update(self):
+        """Update the sensor state."""
+        await self.coordinator.async_request_refresh()
+        self.async_write_ha_state()
