@@ -110,6 +110,16 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
             self._last_update_date = state.attributes.get('last_update_date')
 
     @property
+    def name(self):
+        """Return the name of the sensor."""
+        return self._name
+
+    @property
+    def unique_id(self):
+        """Return the unique ID."""
+        return self._unique_id
+
+    @property
     def state(self):
         """Return the state of the sensor."""
         current_value = self.game.get(self.type)
@@ -123,6 +133,16 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
         daily_change = current_value - self._previous_value
         self._previous_value = current_value
         return daily_change
+
+    @property
+    def unit_of_measurement(self):
+        """Return the unit of measurement."""
+        return SENSOR_TYPES[self.type]["unit"]
+
+    @property
+    def icon(self):
+        """Return the icon."""
+        return SENSOR_TYPES[self.type]["icon"]
 
     @property
     def extra_state_attributes(self):
