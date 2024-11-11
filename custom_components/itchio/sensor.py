@@ -105,9 +105,13 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
         """Handle entity which will be added."""
         await super().async_added_to_hass()
         state = await self.async_get_last_state()
+        print(f"Itchio: daily change sensor {self._name} trying to restore state {state}")
         if state:
             self._previous_value = state.attributes.get('previous_value')
             self._last_update_date = state.attributes.get('last_update_date')
+            print(f"Itchio: daily change sensor {self._name} has been restored with previous value {self._previous_value} and last update date {self._last_update_date}")
+        else:
+            print(f"Itchio: daily change sensor {self._name} has no previous state")
 
     @property
     def name(self):
@@ -126,12 +130,13 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
         current_date = datetime.date.today()
 
         if self._last_update_date != current_date:
+            print(f"Itchio: daily change sensor {self._name} has been reset from {self._previous_value} to {current_value}")
             self._previous_value = current_value
             self._last_update_date = current_date
             return 0
 
         daily_change = current_value - self._previous_value
-        self._previous_value = current_value
+        # self._previous_value = current_value
         return daily_change
 
     @property
