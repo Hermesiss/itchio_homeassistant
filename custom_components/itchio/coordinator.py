@@ -29,11 +29,12 @@ class ItchioDataUpdateCoordinator(DataUpdateCoordinator):
         """Fetch data from Itch.io."""
         url = f"https://itch.io/api/1/{self.api_key}/my-games"
         try:
-            async with self.session.get(url) as response:
-                response.raise_for_status()
-                data = await response.json()
-                self._last_data = data
-                return data
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    response.raise_for_status()
+                    data = await response.json()
+                    self._last_data = data
+                    return data
         except aiohttp.ClientError as err:
             _LOGGER.error("Error communicating with API: %s", err)
             if self._last_data is not None:

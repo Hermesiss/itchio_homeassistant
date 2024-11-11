@@ -5,6 +5,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from .const import DOMAIN, SENSOR_TYPES
 import datetime
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
@@ -44,6 +47,7 @@ class ItchioSensor(CoordinatorEntity):
     @property
     def state(self):
         """Return the state of the sensor."""
+        _LOGGER.debug(f"Itchio: sensor {self._name} state: {self.game.get(self.type)}")
         game_id = self.game["id"]
         self._update_game_data(game_id)
         return self._get_sensor_value()
@@ -105,13 +109,14 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
         """Handle entity which will be added."""
         await super().async_added_to_hass()
         state = await self.async_get_last_state()
-        print(f"Itchio: daily change sensor {self._name} trying to restore state {state}")
+        _LOGGER.debug(f"Itchio: daily change sensor {self._name} trying to restore state {state}")
         if state:
             self._previous_value = state.attributes.get('previous_value')
             self._last_update_date = state.attributes.get('last_update_date')
-            print(f"Itchio: daily change sensor {self._name} has been restored with previous value {self._previous_value} and last update date {self._last_update_date}")
+            _LOGGER.debug(
+                f"Itchio: daily change sensor {self._name} has been restored with previous value {self._previous_value} and last update date {self._last_update_date}")
         else:
-            print(f"Itchio: daily change sensor {self._name} has no previous state")
+            _LOGGER.debug(f"Itchio: daily change sensor {self._name} has no previous state")
 
     @property
     def name(self):
@@ -123,20 +128,37 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
         """Return the unique ID."""
         return self._unique_id
 
+    def _update_game_data(self, game_id):
+        """Update game data from coordinator."""
+        for game in self.coordinator.data.get("games", []):
+            if game["id"] == game_id:
+                self.game = game
+                break
+
     @property
     def state(self):
         """Return the state of the sensor."""
+        self._update_game_data(self.game["id"])
         current_value = self.game.get(self.type)
         current_date = datetime.date.today()
 
-        if self._last_update_date != current_date:
-            print(f"Itchio: daily change sensor {self._name} has been reset from {self._previous_value} to {current_value}")
+        _LOGGER.debug(
+            f"Itchio: daily change sensor {self._name} current value: {current_value}, previous value: {self._previous_value}, "
+            f"last update date: {self._last_update_date}, current date: {current_date}")
+        if str(self._last_update_date) != str(current_date):
+            _LOGGER.debug(
+                f"Itchio: daily change sensor {self._name} has been reset from {self._previous_value} to {current_value}")
             self._previous_value = current_value
             self._last_update_date = current_date
             return 0
 
+        if current_value is None or self._previous_value is None:
+            _LOGGER.warning(
+                f"Itchio: daily change sensor {self._name} has None value(s) - current_value: {current_value}, previous_value: {self._previous_value}")
+            return 0
+
+        _LOGGER.debug(f"Itchio: daily change sensor {self._name} calculating daily change from {self._previous_value} to {current_value}")
         daily_change = current_value - self._previous_value
-        # self._previous_value = current_value
         return daily_change
 
     @property
