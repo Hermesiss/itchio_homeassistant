@@ -23,7 +23,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     async_add_entities(sensors)
 
 
-class ItchioSensor(CoordinatorEntity):
+class ItchioSensor(CoordinatorEntity, RestoreEntity):
     """Representation of an Itch.io Sensor."""
 
     def __init__(self, coordinator, game, sensor_type):
