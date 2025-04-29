@@ -157,9 +157,24 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
                 f"Itchio: daily change sensor {self._name} has None value(s) - current_value: {current_value}, previous_value: {self._previous_value}")
             return 0
 
-        _LOGGER.debug(f"Itchio: daily change sensor {self._name} calculating daily change from {self._previous_value} to {current_value}")
-        daily_change = current_value - self._previous_value
-        return daily_change
+        if isinstance(current_value, list) and isinstance(self._previous_value, list):
+            if len(current_value) == len(self._previous_value):
+                daily_change = [curr - prev for curr, prev in zip(current_value, self._previous_value)]
+                _LOGGER.debug(f"Itchio: daily change sensor {self._name} calculated daily change as list: {daily_change}")
+                return daily_change
+            else:
+                _LOGGER.warning(
+                    f"Itchio: daily change sensor {self._name} has mismatched list lengths - current_value: {current_value}, previous_value: {self._previous_value}")
+                return 0
+
+        if isinstance(current_value, (int, float)) and isinstance(self._previous_value, (int, float)):
+            _LOGGER.debug(f"Itchio: daily change sensor {self._name} calculating daily change from {self._previous_value} to {current_value}")
+            daily_change = current_value - self._previous_value
+            return daily_change
+
+        _LOGGER.warning(
+            f"Itchio: daily change sensor {self._name} has unsupported types - current_value: {current_value}, previous_value: {self._previous_value}")
+        return 0
 
     @property
     def unit_of_measurement(self):
