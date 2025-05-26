@@ -135,16 +135,25 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
                 self.game = game
                 break
 
+    def _get_sensor_value(self, value):
+        """Get the numeric value from sensor data, handling earnings structure."""
+        if self.type == "earnings" and isinstance(value, list) and len(value) > 0:
+            amount = value[0].get("amount", 0)
+            return amount / 100
+        return value
+
     @property
     def state(self):
         """Return the state of the sensor."""
         self._update_game_data(self.game["id"])
-        current_value = self.game.get(self.type)
+        raw_current_value = self.game.get(self.type)
+        current_value = self._get_sensor_value(raw_current_value)
         current_date = datetime.date.today()
 
         _LOGGER.debug(
             f"Itchio: daily change sensor {self._name} current value: {current_value}, previous value: {self._previous_value}, "
             f"last update date: {self._last_update_date}, current date: {current_date}")
+        
         if str(self._last_update_date) != str(current_date):
             _LOGGER.debug(
                 f"Itchio: daily change sensor {self._name} has been reset from {self._previous_value} to {current_value}")
@@ -156,6 +165,11 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
             _LOGGER.warning(
                 f"Itchio: daily change sensor {self._name} has None value(s) - current_value: {current_value}, previous_value: {self._previous_value}")
             return 0
+
+        # Handle case where previous_value might be stored as dict/list from before the fix
+        if isinstance(self._previous_value, (dict, list)) and self.type == "earnings":
+            _LOGGER.debug(f"Itchio: daily change sensor {self._name} converting legacy previous_value format")
+            self._previous_value = self._get_sensor_value(self._previous_value)
 
         if isinstance(current_value, list) and isinstance(self._previous_value, list):
             if len(current_value) == len(self._previous_value):
@@ -173,7 +187,7 @@ class ItchioDailyChangeSensor(CoordinatorEntity, RestoreEntity):
             return daily_change
 
         _LOGGER.warning(
-            f"Itchio: daily change sensor {self._name} has unsupported types - current_value: {current_value}, previous_value: {self._previous_value}")
+            f"Itchio: daily change sensor {self._name} has unsupported types - current_value: {current_value} ({type(current_value)}), previous_value: {self._previous_value} ({type(self._previous_value)})")
         return 0
 
     @property
