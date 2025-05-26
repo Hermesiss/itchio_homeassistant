@@ -2,6 +2,14 @@
 DOMAIN = "itchio"
 CONF_SCAN_INTERVAL = "scan_interval"
 
+# Default values
+DEFAULT_SCAN_INTERVAL = 5
+MIN_SCAN_INTERVAL = 5
+API_TIMEOUT = 30
+
+# API endpoints
+API_BASE_URL = "https://itch.io/api/1"
+
 SENSOR_TYPES = {
     "views_count": {
         "name": "Views",
